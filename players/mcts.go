@@ -3,6 +3,7 @@ package players
 import (
 	"fmt"
 	"math/rand"
+	"strings"
 )
 
 type gameState struct {
@@ -290,17 +291,18 @@ func (p *MCTS) String() string {
 }
 
 func boardString(board [25]int) string {
-	s := "   0 1 2 3 4\n"
+	buf := &strings.Builder{}
+	buf.WriteString("   0 1 2 3 4\n")
 	for i := 0; i < 25; i++ {
 		if (i % 5) == 0 {
-			s += string((i/5)+'0') + "  "
+			fmt.Fprintf(buf, "%c ", rune(i/5)+'0')
 		}
-		s += string("O_X"[board[i]+1]) + " "
+		fmt.Fprintf(buf, "%c ", "O_X"[board[i]+1])
 		if (i % 5) == 4 {
-			s += "\n"
+			buf.WriteString("\n")
 		}
 	}
-	return s
+	return buf.String()
 }
 
 var importantCells = [9]int{2, 7, 10, 11, 12, 13, 14, 17, 22}
