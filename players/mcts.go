@@ -5,10 +5,9 @@ import (
 	"math/rand"
 )
 
-type GameState struct {
-	player        int
-	board         [25]int
-	cachedResults [3]float64
+type gameState struct {
+	player int
+	board  [25]int
 }
 
 type Node struct {
@@ -79,7 +78,7 @@ func bestMove(board [25]int, iterations int) (move int, score float64, leafCount
 		}
 	}
 
-	var state GameState
+	state := &gameState{}
 
 	for iters := 0; iters < iterations; iters++ {
 
@@ -94,8 +93,7 @@ func bestMove(board [25]int, iterations int) (move int, score float64, leafCount
 		// Selection
 		for len(node.untriedMoves) == 0 && len(node.childNodes) > 0 {
 			node = node.selectBestChild()
-			state.player = 0 - state.player
-			state.board[node.move] = state.player
+			state.makeMove(node.move)
 		}
 
 		// node points to a Node struct that has no child nodes
@@ -114,10 +112,9 @@ func bestMove(board [25]int, iterations int) (move int, score float64, leafCount
 		if len(node.untriedMoves) > 0 {
 			mv := node.untriedMoves[rand.Intn(len(node.untriedMoves))]
 
-			state.player = 0 - state.player
-			state.board[mv] = state.player
+			state.makeMove(mv)
 
-			node = node.AddChild(mv, &state) // AddChild take mv out of untriedMoves slice
+			node = node.AddChild(mv, state) // AddChild take mv out of untriedMoves slice
 			node.winner = findWinner(&(state.board))
 			if node.winner == MAXIMIZER {
 				node.score = 1.0
@@ -128,18 +125,11 @@ func bestMove(board [25]int, iterations int) (move int, score float64, leafCount
 
 		// Simulation
 		if node.winner == UNSET {
-			moves := (&state).RemainingMoves()
+			moves := state.remainingMoves()
 
 			for len(moves) > 0 {
-				// seems like if a player has a winning move,
-				// it should take it, and if a player can avoid
-				// a 3-in-a-row losing move, it should avoid it.
-				// fmt.Printf("\tRemaining moves: %v\n", moves)
-				// A player should also block a 4-in-a-row
 				m := moves[rand.Intn(len(moves))]
-				state.player = 0 - state.player
-				state.board[m] = state.player
-				// fmt.Printf("\tmove %d, player %d\n", m, state.player)
+				state.makeMove(m)
 				winner := findWinner(&(state.board))
 				if winner != UNSET {
 					if winner == MAXIMIZER {
@@ -193,13 +183,13 @@ func cutElement(ary *[]int, v int) {
 	}
 }
 
-func (node *Node) AddChild(mv int, state *GameState) *Node {
+func (node *Node) AddChild(mv int, state *gameState) *Node {
 	// fmt.Printf("node.AddChild(%d, %d)\n", mv, state.player)
 	ch := &Node{
 		move:         mv,
 		parent:       node,
 		player:       state.player,
-		untriedMoves: state.RemainingMoves(),
+		untriedMoves: state.remainingMoves(),
 	}
 	node.childNodes = append(node.childNodes, ch)
 	// weed out mv as an untried move
@@ -229,9 +219,9 @@ func (node *Node) selectBestChild() *Node {
 	return best
 }
 
-// RemainingMoves returns an array of all moves left
+// remainingMoves returns an array of all moves left
 // unmade on state.board
-func (state *GameState) RemainingMoves() []int {
+func (state *gameState) remainingMoves() []int {
 	mvs := make([]int, 0, 25)
 	j := 0
 	for i := 0; i < 25; i++ {
@@ -241,6 +231,11 @@ func (state *GameState) RemainingMoves() []int {
 		}
 	}
 	return mvs
+}
+
+func (state *gameState) makeMove(mv int) {
+	state.player = 0 - state.player
+	state.board[mv] = state.player
 }
 
 func (p *MCTS) PrintBoard() {
