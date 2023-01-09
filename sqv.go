@@ -10,7 +10,6 @@ import (
 	"time"
 
 	"squava2/players"
-	player "squava2/players"
 )
 
 const (
@@ -100,7 +99,7 @@ func createPlayer(typ string, maxDepth int, factor float64, iterations int) play
 		ab.SetAvoid()
 		return ab
 	case "M":
-		mcts := player.NewMCTS(iterations)
+		mcts := players.NewMCTS(iterations)
 		return mcts
 	}
 
