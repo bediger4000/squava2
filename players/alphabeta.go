@@ -16,6 +16,7 @@ const (
 
 type AlphaBeta struct {
 	bd            *board
+	moveCounter   int
 	name          string
 	leafNodeCount int
 	maxDepth      int
@@ -68,18 +69,19 @@ func (p *AlphaBeta) Name() string {
 // making opposing player's move
 func (p *AlphaBeta) MakeMove(x, y int, player int) {
 	p.bd[x][y] = player
+	p.moveCounter++
 }
 
-// SetDepth changes the max recursion depth based
+// setDepth changes the max recursion depth based
 // on how far along the game has gotten.
-func (p *AlphaBeta) SetDepth(moveCounter int) {
-	if moveCounter < 4 {
+func (p *AlphaBeta) setDepth() {
+	if p.moveCounter < 4 {
 		p.maxDepth = 8
 	}
-	if moveCounter > 3 {
+	if p.moveCounter > 3 {
 		p.maxDepth = 10
 	}
-	if moveCounter > 10 {
+	if p.moveCounter > 10 {
 		p.maxDepth = 12
 	}
 }
@@ -88,6 +90,8 @@ func (p *AlphaBeta) SetDepth(moveCounter int) {
 func (p *AlphaBeta) ChooseMove() (xcoord int, ycoord int, value int, leafcount int) {
 
 	moves := NewMovekeeper(2*LOSS, p.deterministic)
+
+	p.setDepth()
 
 	p.leafNodeCount = 0
 
