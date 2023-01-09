@@ -38,6 +38,10 @@ func (p *MCTS) Name() string {
 	return "MCTS/Plain"
 }
 
+func (p *MCTS) SetIterations(iterations int) {
+	p.iterations = iterations
+}
+
 func (p *MCTS) MakeMove(x, y int, player int) {
 	p.board[5*x+y] = player
 }
