@@ -129,13 +129,16 @@ func bestMove(board [25]int, iterations int) (move int, score float64, leafCount
 			moves := state.remainingMoves()
 
 			for len(moves) > 0 {
-				// Whoever can make a winning move for them should make it
-				m := chooseAWinner(&(state.board), moves, 0-state.player)
-				if m < 0 {
-					// no winning move for current player
-					// Whoever can avoid a losing move for them should avoid it
-					acceptableMoves := removeLosses(&(state.board), moves, 0-state.player)
-					m = acceptableMoves[rand.Intn(len(acceptableMoves))]
+				var m int
+				w, l, o := categorizeMoves(&(state.board), moves, 0-state.player)
+				if len(w) > 0 {
+					// Whoever can make a winning move for them should make it
+					m = w[rand.Intn(len(w))]
+				} else if len(o) > 0 {
+					// Whoever can avoid a loosing move for them should make it
+					m = o[rand.Intn(len(o))]
+				} else {
+					m = l[rand.Intn(len(l))]
 				}
 
 				state.makeMove(m)
@@ -192,25 +195,25 @@ func cutElement(ary *[]int, v int) {
 	}
 }
 
-// removeLosses takes out losing moves for players,
-// returns slice of non-losing moves
-func removeLosses(board *[25]int, moves []int, player int) []int {
-	if len(moves) < 2 {
-		return moves
-	}
-	acceptableMoves := make([]int, 0, len(moves))
+// categorizeMoves puts any empty spot on the board into categories:
+// 1. player wins
+// 2. other player wins, which means player chose a 3-in-a-row loss
+// 3. all other moves
+func categorizeMoves(board *[25]int, moves []int, player int) (wins []int, losses []int, other []int) {
 	for _, m := range moves {
 		(*board)[m] = player
 		x := findWinner(board)
-		if x == UNSET || x == player {
-			acceptableMoves = append(acceptableMoves, m)
-		}
 		(*board)[m] = UNSET
+		switch {
+		case x == UNSET:
+			other = append(other, m)
+		case x == player:
+			wins = append(wins, m)
+		case x != player:
+			losses = append(losses, m)
+		}
 	}
-	if len(acceptableMoves) > 0 {
-		return acceptableMoves
-	}
-	return moves
+	return
 }
 
 func (node *Node) AddChild(mv int, state *gameState) *Node {
@@ -313,29 +316,6 @@ func findWinner(board *[25]int) int {
 		}
 	}
 	return UNSET
-}
-
-// chooseAWinner picks a winning move for player, if there is one, from board.
-// Returns -1 if there's no winning move
-func chooseAWinner(board *[25]int, moves []int, player int) int {
-	var winningMoves []int
-	for _, mv := range moves {
-		(*board)[mv] = player
-		w := findWinner(board)
-		(*board)[mv] = UNSET
-		if w == player {
-			winningMoves = append(winningMoves, mv)
-		}
-	}
-
-	if len(winningMoves) > 0 {
-		if len(winningMoves) == 1 {
-			return winningMoves[0]
-		}
-		return winningMoves[rand.Intn(len(winningMoves))]
-	}
-
-	return -1
 }
 
 func (p *MCTS) String() string {
