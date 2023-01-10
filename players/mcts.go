@@ -129,7 +129,15 @@ func bestMove(board [25]int, iterations int) (move int, score float64, leafCount
 			moves := state.remainingMoves()
 
 			for len(moves) > 0 {
-				m := moves[rand.Intn(len(moves))]
+				// Whoever can make a winning move for them should make it
+				m := chooseAWinner(&(state.board), moves, 0-state.player)
+				if m < 0 {
+					// no winning move for current player
+					// Whoever can avoid a losing move for them should avoid it
+					acceptableMoves := removeLosses(&(state.board), moves, 0-state.player)
+					m = acceptableMoves[rand.Intn(len(acceptableMoves))]
+				}
+
 				state.makeMove(m)
 				winner := findWinner(&(state.board))
 				if winner != UNSET {
@@ -182,6 +190,27 @@ func cutElement(ary *[]int, v int) {
 			break
 		}
 	}
+}
+
+// removeLosses takes out losing moves for players,
+// returns slice of non-losing moves
+func removeLosses(board *[25]int, moves []int, player int) []int {
+	if len(moves) < 2 {
+		return moves
+	}
+	acceptableMoves := make([]int, 0, len(moves))
+	for _, m := range moves {
+		(*board)[m] = player
+		x := findWinner(board)
+		if x == UNSET || x == player {
+			acceptableMoves = append(acceptableMoves, m)
+		}
+		(*board)[m] = UNSET
+	}
+	if len(acceptableMoves) > 0 {
+		return acceptableMoves
+	}
+	return moves
 }
 
 func (node *Node) AddChild(mv int, state *gameState) *Node {
@@ -286,16 +315,42 @@ func findWinner(board *[25]int) int {
 	return UNSET
 }
 
+// chooseAWinner picks a winning move for player, if there is one, from board.
+// Returns -1 if there's no winning move
+func chooseAWinner(board *[25]int, moves []int, player int) int {
+	var winningMoves []int
+	for _, mv := range moves {
+		(*board)[mv] = player
+		w := findWinner(board)
+		(*board)[mv] = UNSET
+		if w == player {
+			winningMoves = append(winningMoves, mv)
+		}
+	}
+
+	if len(winningMoves) > 0 {
+		if len(winningMoves) == 1 {
+			return winningMoves[0]
+		}
+		return winningMoves[rand.Intn(len(winningMoves))]
+	}
+
+	return -1
+}
+
 func (p *MCTS) String() string {
 	return boardString(p.board)
 }
 
+// boardString exists as a separate function so that if
+// printf-style debugging is necessary, gameState.board
+// can also get printed.
 func boardString(board [25]int) string {
 	buf := &strings.Builder{}
 	buf.WriteString("   0 1 2 3 4\n")
 	for i := 0; i < 25; i++ {
 		if (i % 5) == 0 {
-			fmt.Fprintf(buf, "%c ", rune(i/5)+'0')
+			fmt.Fprintf(buf, "%c  ", rune(i/5)+'0')
 		}
 		fmt.Fprintf(buf, "%c ", "O_X"[board[i]+1])
 		if (i % 5) == 4 {
