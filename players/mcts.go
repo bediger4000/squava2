@@ -16,8 +16,8 @@ type Node struct {
 	player       int
 	parent       *Node
 	childNodes   []*Node
-	wins         float64
-	visits       float64
+	wins         int
+	visits       int
 	score        float64
 	untriedMoves []int
 }
@@ -147,24 +147,26 @@ func bestMove(board [25]int, iterations int) (move int, score float64, leafCount
 		leafCount++
 
 		for node != nil {
-			node.visits += 1.0
+			node.visits++
 			if winner == node.player {
-				node.wins += 1.0
-				node.score = node.wins / node.visits
+				node.wins++
 			}
+			node.score = float64(node.wins) / float64(node.visits)
 			node = node.parent
 		}
 	}
 
-	fmt.Printf("after iterations root node %.0f/%.0f\n", root.wins, root.visits)
+	fmt.Printf("after iterations root node %d/%d/%.3f\n", root.wins, root.visits, root.score)
 
 	fmt.Println("Child nodes:")
 	for _, c := range root.childNodes {
-		fmt.Printf("\tmove %d, player %d, %.0f/%.0f/%.3f\n", c.move, c.player, c.wins, c.visits, c.score)
+		xcoord := c.move / 5
+		ycoord := c.move % 5
+		fmt.Printf("\tmove %d <%d,%d>, player %d, %d/%d/%.3f\n", c.move, xcoord, ycoord, c.player, c.wins, c.visits, c.score)
 	}
 
 	moveNode := root.selectMostVisitedChild()
-	fmt.Printf("\nbest move node move %d, player %d, %.0f/%.0f/%.3f\n", moveNode.move, moveNode.player, moveNode.wins, moveNode.visits, moveNode.score)
+	fmt.Printf("\nbest move node move %d, player %d, %d/%d/%.3f\n", moveNode.move, moveNode.player, moveNode.wins, moveNode.visits, moveNode.score)
 	move = moveNode.move
 	score = moveNode.score
 
@@ -215,13 +217,6 @@ func (node *Node) AddChild(mv int, state *gameState) *Node {
 	node.childNodes = append(node.childNodes, ch)
 	// weed out mv as an untried move
 	cutElement(&(node.untriedMoves), mv)
-
-	/* fmt.Printf("Child nodes %d:\n", len(node.childNodes))
-	for _, n := range node.childNodes {
-		fmt.Printf("\tmove %d player %d, %.0f/%.0f/%.3f\n", n.move, n.player, n.wins, n.visits, n.score)
-	}
-	fmt.Printf("untried moves: %v\n", node.untriedMoves)
-	*/
 
 	return ch
 }
