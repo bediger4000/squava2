@@ -12,17 +12,14 @@ type gameState struct {
 }
 
 type Node struct {
-	move       int
-	player     int
-	parent     *Node
-	childNodes []*Node
-	wins       float64
-	visits     float64
-	score      float64
-	// score should be 0 for a losing move,
-	// 1 for a winning move
+	move         int
+	player       int
+	parent       *Node
+	childNodes   []*Node
+	wins         float64
+	visits       float64
+	score        float64
 	untriedMoves []int
-	winner       int
 }
 
 type MCTS struct {
@@ -104,7 +101,7 @@ func bestMove(board [25]int, iterations int) (move int, score float64, leafCount
 		// state should represent the board resulting from following
 		// the "best child" nodes.
 
-		var win bool
+		var winner int
 
 		// Expansion will pick an untried move on the struct Node
 		// pointed to by Node, if it has untried moves. If node points to a
@@ -116,16 +113,12 @@ func bestMove(board [25]int, iterations int) (move int, score float64, leafCount
 			state.makeMove(mv)
 
 			node = node.AddChild(mv, state) // AddChild take mv out of untriedMoves slice
-			node.winner = findWinner(&(state.board))
-			if node.winner == MAXIMIZER {
-				node.score = 1.0
-				win = true
-			}
+			winner = findWinner(&(state.board))
 			// node represents mv, the previously untried move
 		}
 
 		// Simulation
-		if node.winner == UNSET {
+		if winner == UNSET {
 			moves := state.remainingMoves()
 
 			for len(moves) > 0 {
@@ -134,6 +127,7 @@ func bestMove(board [25]int, iterations int) (move int, score float64, leafCount
 				if len(w) > 0 {
 					// Whoever can make a winning move for them should make it
 					m = w[rand.Intn(len(w))]
+					winner = 0 - state.player
 				} else if len(o) > 0 {
 					// Whoever can avoid a loosing move for them should make it
 					m = o[rand.Intn(len(o))]
@@ -142,28 +136,22 @@ func bestMove(board [25]int, iterations int) (move int, score float64, leafCount
 				}
 
 				state.makeMove(m)
-				winner := findWinner(&(state.board))
+				cutElement(&moves, m)
+
 				if winner != UNSET {
-					if winner == MAXIMIZER {
-						win = true
-					}
 					break
 				}
-				cutElement(&moves, m)
 			}
 		}
 
 		leafCount++
 
-		winIncr := 0.0
-		if win {
-			winIncr = 1.0
-		}
-
 		for node != nil {
 			node.visits += 1.0
-			node.wins += winIncr
-			node.score = node.wins / node.visits
+			if winner == node.player {
+				node.wins += 1.0
+				node.score = node.wins / node.visits
+			}
 			node = node.parent
 		}
 	}
@@ -175,7 +163,7 @@ func bestMove(board [25]int, iterations int) (move int, score float64, leafCount
 		fmt.Printf("\tmove %d, player %d, %.0f/%.0f/%.3f\n", c.move, c.player, c.wins, c.visits, c.score)
 	}
 
-	moveNode := root.selectBestChild()
+	moveNode := root.selectMostVisitedChild()
 	fmt.Printf("\nbest move node move %d, player %d, %.0f/%.0f/%.3f\n", moveNode.move, moveNode.player, moveNode.wins, moveNode.visits, moveNode.score)
 	move = moveNode.move
 	score = moveNode.score
@@ -246,6 +234,20 @@ func (node *Node) selectBestChild() *Node {
 		if c.score > bestScore {
 			best = c
 			bestScore = c.score
+		}
+	}
+
+	return best
+}
+
+func (node *Node) selectMostVisitedChild() *Node {
+	best := node.childNodes[0]
+	mostVisits := node.childNodes[0].visits
+
+	for _, c := range node.childNodes {
+		if c.visits > mostVisits {
+			best = c
+			mostVisits = c.visits
 		}
 	}
 
