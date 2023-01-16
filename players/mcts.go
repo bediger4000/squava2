@@ -101,13 +101,13 @@ func bestMove(board [25]int, iterations int) (move int, score float64, leafCount
 		// state should represent the board resulting from following
 		// the "best child" nodes.
 
-		var winner int
+		winner := findWinner(&(state.board))
 
 		// Expansion will pick an untried move on the struct Node
 		// pointed to by Node, if it has untried moves. If node points to a
 		// struct Node reached by following "best child" nodes,
 		// node may not have untried moves.
-		if len(node.untriedMoves) > 0 {
+		if winner == UNSET && len(node.untriedMoves) > 0 {
 			mv := node.untriedMoves[rand.Intn(len(node.untriedMoves))]
 
 			state.makeMove(mv)
