@@ -133,6 +133,7 @@ func bestMove(board [25]int, iterations int) (move int, score float64, leafCount
 					m = o[rand.Intn(len(o))]
 				} else {
 					m = l[rand.Intn(len(l))]
+					winner = state.player // state.player moved last, forced a loss
 				}
 
 				state.makeMove(m)
