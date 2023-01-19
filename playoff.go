@@ -109,7 +109,7 @@ func nonInteractiveGames(gameCount int, firstType, secondType string, maxDepth i
 
 		first, second := createPlayers(firstType, secondType, maxDepth, false)
 
-		fmt.Printf("%d %s %s %d %v ", i, first.Name(), second.Name(), maxDepth)
+		fmt.Printf("%d %s %s %d ", i, first.Name(), second.Name(), maxDepth)
 
 		var moves [25][2]int
 		var values [25][2]int
