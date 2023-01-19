@@ -50,7 +50,7 @@ func (p *MCTS) ChooseMove() (xcoord int, ycoord int, value int, leafcount int) {
 	var best int
 	var score float64
 
-	best, score, leafcount = bestMove(p.board, p.iterations)
+	best, score, leafcount = bestMove(p.board, p.iterations, false)
 
 	p.board[best] = MAXIMIZER
 
@@ -64,7 +64,7 @@ func (p *MCTS) ChooseMove() (xcoord int, ycoord int, value int, leafcount int) {
 	return
 }
 
-func bestMove(board [25]int, iterations int) (move int, score float64, leafCount int) {
+func bestMove(board [25]int, iterations int, verbose bool) (move int, score float64, leafCount int) {
 
 	root := &Node{
 		player: MINIMIZER, // opponent made the last move
@@ -73,6 +73,26 @@ func bestMove(board [25]int, iterations int) (move int, score float64, leafCount
 	for i := range board {
 		if board[i] == UNSET {
 			root.untriedMoves = append(root.untriedMoves, i)
+		}
+	}
+
+	w, l, o := categorizeMoves(&board, root.untriedMoves, MAXIMIZER)
+
+	if len(w) == 1 {
+		return w[0], 10000, 1
+	}
+	if len(w) > 1 {
+		return w[rand.Intn(len(w)-1)], 10000, 1
+	}
+
+	if len(o) > 0 {
+		root.untriedMoves = o
+	} else {
+		if len(l) == 1 {
+			return l[0], -10000, 1
+		}
+		if len(l) > 1 {
+			return l[rand.Intn(len(l)-1)], -10000, 1
 		}
 	}
 
@@ -157,17 +177,20 @@ func bestMove(board [25]int, iterations int) (move int, score float64, leafCount
 		}
 	}
 
-	fmt.Printf("after iterations root node %d/%d/%.3f\n", root.wins, root.visits, root.score)
-
-	fmt.Println("Child nodes:")
-	for _, c := range root.childNodes {
-		xcoord := c.move / 5
-		ycoord := c.move % 5
-		fmt.Printf("\tmove %d <%d,%d>, player %d, %d/%d/%.3f\n", c.move, xcoord, ycoord, c.player, c.wins, c.visits, c.score)
+	if verbose {
+		fmt.Printf("after iterations root node %d/%d/%.3f\n", root.wins, root.visits, root.score)
+		fmt.Println("Child nodes:")
+		for _, c := range root.childNodes {
+			xcoord := c.move / 5
+			ycoord := c.move % 5
+			fmt.Printf("\tmove %d <%d,%d>, player %d, %d/%d/%.3f\n", c.move, xcoord, ycoord, c.player, c.wins, c.visits, c.score)
+		}
 	}
 
 	moveNode := root.selectMostVisitedChild()
-	fmt.Printf("\nbest move node move %d, player %d, %d/%d/%.3f\n", moveNode.move, moveNode.player, moveNode.wins, moveNode.visits, moveNode.score)
+	if verbose {
+		fmt.Printf("\nbest move node move %d, player %d, %d/%d/%.3f\n", moveNode.move, moveNode.player, moveNode.wins, moveNode.visits, moveNode.score)
+	}
 	move = moveNode.move
 	score = moveNode.score
 
