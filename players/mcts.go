@@ -2,6 +2,7 @@ package players
 
 import (
 	"fmt"
+	"math"
 	"math/rand"
 	"strings"
 )
@@ -18,21 +19,41 @@ type Node struct {
 	childNodes   []*Node
 	wins         int
 	visits       int
-	score        float64
 	untriedMoves []int
 }
 
 type MCTS struct {
+	name       string
 	board      [25]int
 	iterations int
+	scoreFn    func(*Node) float64
+}
+
+func ratio(node *Node) float64 {
+	return float64(node.wins) / float64(node.visits)
+}
+
+func ucb1(node *Node) float64 {
+	v := float64(node.visits)
+	return float64(node.wins)/v +
+		1.414*math.Sqrt(math.Log(float64(node.parent.visits+1))/v)
 }
 
 func NewMCTS(iterations int) *MCTS {
-	return &MCTS{iterations: iterations}
+	return &MCTS{
+		name:       "MCTS/Plain",
+		iterations: iterations,
+		scoreFn:    ratio,
+	}
+}
+
+func (p *MCTS) SetUCB1() {
+	p.scoreFn = ucb1
+	p.name = "MCTS/UCB1"
 }
 
 func (p *MCTS) Name() string {
-	return "MCTS/Plain"
+	return p.name
 }
 
 func (p *MCTS) SetIterations(iterations int) {
@@ -50,7 +71,7 @@ func (p *MCTS) ChooseMove() (xcoord int, ycoord int, value int, leafcount int) {
 	var best int
 	var score float64
 
-	best, score, leafcount = bestMove(p.board, p.iterations, false)
+	best, score, leafcount = bestMove(p.board, p.iterations, p.scoreFn, false)
 
 	p.board[best] = MAXIMIZER
 
@@ -64,7 +85,7 @@ func (p *MCTS) ChooseMove() (xcoord int, ycoord int, value int, leafcount int) {
 	return
 }
 
-func bestMove(board [25]int, iterations int, verbose bool) (move int, score float64, leafCount int) {
+func bestMove(board [25]int, iterations int, scoreFn func(*Node) float64, verbose bool) (move int, score float64, leafCount int) {
 
 	root := &Node{
 		player: MINIMIZER, // opponent made the last move
@@ -110,7 +131,7 @@ func bestMove(board [25]int, iterations int, verbose bool) (move int, score floa
 
 		// Selection
 		for len(node.untriedMoves) == 0 && len(node.childNodes) > 0 {
-			node = node.selectBestChild()
+			node = node.selectBestChild(scoreFn)
 			state.makeMove(node.move)
 		}
 
@@ -172,27 +193,28 @@ func bestMove(board [25]int, iterations int, verbose bool) (move int, score floa
 			if winner == node.player {
 				node.wins++
 			}
-			node.score = float64(node.wins) / float64(node.visits)
 			node = node.parent
 		}
 	}
 
 	if verbose {
-		fmt.Printf("after iterations root node %d/%d/%.3f\n", root.wins, root.visits, root.score)
+		fmt.Printf("after iterations root node %d/%d/%.3f\n", root.wins, root.visits, scoreFn(root))
 		fmt.Println("Child nodes:")
 		for _, c := range root.childNodes {
 			xcoord := c.move / 5
 			ycoord := c.move % 5
-			fmt.Printf("\tmove %d <%d,%d>, player %d, %d/%d/%.3f\n", c.move, xcoord, ycoord, c.player, c.wins, c.visits, c.score)
+			fmt.Printf("\tmove %d <%d,%d>, player %d, %d/%d/%.3f\n", c.move, xcoord, ycoord, c.player, c.wins, c.visits, scoreFn(c))
 		}
 	}
 
 	moveNode := root.selectMostVisitedChild()
-	if verbose {
-		fmt.Printf("\nbest move node move %d, player %d, %d/%d/%.3f\n", moveNode.move, moveNode.player, moveNode.wins, moveNode.visits, moveNode.score)
-	}
+
+	score = scoreFn(moveNode)
 	move = moveNode.move
-	score = moveNode.score
+
+	if verbose {
+		fmt.Printf("\nbest move node move %d, player %d, %d/%d/%.3f\n", move, moveNode.player, moveNode.wins, moveNode.visits, score)
+	}
 
 	return
 }
@@ -245,14 +267,15 @@ func (node *Node) AddChild(mv int, state *gameState) *Node {
 	return ch
 }
 
-func (node *Node) selectBestChild() *Node {
+func (node *Node) selectBestChild(scoreFn func(*Node) float64) *Node {
 	best := node.childNodes[0]
-	bestScore := node.childNodes[0].score
+	bestScore := scoreFn(node.childNodes[0])
 
 	for _, c := range node.childNodes {
-		if c.score > bestScore {
+		score := scoreFn(c)
+		if score > bestScore {
 			best = c
-			bestScore = c.score
+			bestScore = score
 		}
 	}
 
