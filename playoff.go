@@ -180,6 +180,10 @@ func createPlayer(typ string, maxDepth int, deterministic bool, iterations int) 
 	case "M":
 		mcts := players.NewMCTS(iterations)
 		return mcts
+	case "U":
+		mcts := players.NewMCTS(iterations)
+		mcts.SetUCB1()
+		return mcts
 	}
 
 	return nil
