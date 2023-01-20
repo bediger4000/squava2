@@ -80,7 +80,7 @@ func (p *MCTS) ChooseMove() (xcoord int, ycoord int, value int, leafcount int) {
 	xcoord = best / 5
 	ycoord = best % 5
 
-	value = int(score * 1000.)
+	value = int(score * 10000.)
 
 	return
 }
