@@ -45,7 +45,6 @@ func main() {
 	}
 
 	if *secondType == "M" {
-		// second.(*players.MCTS).SetUCTK(*u2)
 		second.(*players.MCTS).SetIterations(*i2)
 	}
 
@@ -109,11 +108,13 @@ func nonInteractiveGames(gameCount int, firstType, secondType string, maxDepth i
 
 		first, second := createPlayers(firstType, secondType, maxDepth, false)
 
-		fmt.Printf("%d %s %s %d ", i, first.Name(), second.Name(), maxDepth)
+		fmt.Printf("%d\t%s\t%s\t", i, first.Name(), second.Name())
 
 		var moves [25][2]int
 		var values [25][2]int
 		var winner int
+
+		gameStart := time.Now()
 
 		for moveCounter < 25 {
 
@@ -138,7 +139,9 @@ func nonInteractiveGames(gameCount int, firstType, secondType string, maxDepth i
 			}
 		}
 
-		fmt.Printf("%d %d", moveCounter, winner)
+		gameET := time.Since(gameStart)
+
+		fmt.Printf("%d\t%d\t %.02f\t", moveCounter, winner, gameET.Seconds())
 
 		for i := 0; i < moveCounter; i++ {
 			marker := [2]string{"", ""}
@@ -150,7 +153,7 @@ func nonInteractiveGames(gameCount int, firstType, secondType string, maxDepth i
 					marker[j] = "-"
 				}
 			}
-			fmt.Printf(" %d%s,%d%s", moves[i][0], marker[0], moves[i][1], marker[1])
+			fmt.Printf("%d%s,%d%s ", moves[i][0], marker[0], moves[i][1], marker[1])
 		}
 
 		fmt.Printf("\n")
