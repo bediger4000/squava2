@@ -21,7 +21,7 @@ func main() {
 
 	computerFirstPtr := flag.Bool("C", false, "Computer takes first move (default false)")
 	maxDepthPtr := flag.Int("d", 10, "maximum lookahead depth (alpha/beta)")
-	typ := flag.String("t", "A", "first player type, A: alphabeta, G: A/B+avoid bad positions, M: MCTS")
+	typ := flag.String("t", "A", "player type, A: alphabeta, G: A/B+avoid bad positions, M: MCTS/Plain, U: MCTS/UCB1")
 	u := flag.Float64("u", 0.50, "UCTK coefficient, player 1 (MCTS)")
 	i := flag.Int("i", 500000, "MCTS iterations, player 1")
 	flag.Parse()
@@ -100,6 +100,12 @@ func createPlayer(typ string, maxDepth int, factor float64, iterations int) play
 		return ab
 	case "M":
 		mcts := players.NewMCTS(iterations)
+		mcts.SetIterations(iterations)
+		return mcts
+	case "U":
+		mcts := players.NewMCTS(iterations)
+		mcts.SetIterations(iterations)
+		mcts.SetUCB1()
 		return mcts
 	}
 
