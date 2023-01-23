@@ -8,6 +8,7 @@ import (
 )
 
 type Mvr struct {
+	nextPlayer  int
 	moves       [][]byte
 	moveCounter int
 	count       int
@@ -39,20 +40,30 @@ func NewFromBuffer(buffer []byte) *Mvr {
 	}
 }
 
-func (m *Mvr) Next() (int, int, bool) {
+func (m *Mvr) NextPlayer(player int) {
+	if player == 1 || player == -1 {
+		m.nextPlayer = player
+	}
+}
+
+// Next - player, x,y, movecounter, good move/problem
+func (m *Mvr) Next() (int, int, int, int, bool) {
 
 	if m.moveCounter == m.count {
-		return 0, 0, false
+		return 0, 0, 0, m.moveCounter, false
 	}
 
 	move := m.moves[m.moveCounter]
-	defer func() { m.moveCounter++ }()
+	defer func() {
+		m.moveCounter++
+		m.nextPlayer = 0 - m.nextPlayer
+	}()
 
 	fields := bytes.Split(move, []byte{','})
 
 	if len(fields) != 2 {
 		fmt.Fprintf(os.Stderr, "Move %d, %q, problem\n", m.moveCounter, string(move))
-		return 0, 0, false
+		return 0, 0, 0, m.moveCounter, false
 	}
 
 	if len(fields[0]) == 2 {
@@ -64,17 +75,17 @@ func (m *Mvr) Next() (int, int, bool) {
 
 	if fields[0][0] < '0' || fields[0][0] > '4' {
 		fmt.Fprintf(os.Stderr, "Move %d, %q, problem with 1st field\n", m.moveCounter, string(move))
-		return 0, 0, false
+		return 0, 0, 0, m.moveCounter, false
 	}
 
 	x := int(fields[0][0] - '0')
 
 	if fields[1][0] < '0' || fields[1][0] > '4' {
 		fmt.Fprintf(os.Stderr, "Move %d, %q, problem with 2nd field\n", m.moveCounter, string(move))
-		return 0, 0, false
+		return 0, 0, 0, m.moveCounter, false
 	}
 
 	y := int(fields[1][0] - '0')
 
-	return x, y, true
+	return m.nextPlayer, x, y, m.moveCounter, true
 }

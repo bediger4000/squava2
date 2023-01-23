@@ -9,7 +9,7 @@ import (
 
 func main() {
 
-	markers := []rune{'X', 'O'}
+	markers := []rune{'X', '_', 'O'}
 
 	board := make([][]rune, 5)
 	for i := 0; i < 5; i++ {
@@ -17,16 +17,17 @@ func main() {
 	}
 
 	mvr := mover.NewFromFile(os.Args[1])
+	mvr.NextPlayer(1)
 
-	for moveCounter := 0; moveCounter < 25; moveCounter++ {
+	for {
 
-		n, m, useIt := mvr.Next()
-		if !useIt {
-			continue
+		player, n, m, counter, useIt := mvr.Next()
+		if !useIt || counter > 24 {
+			break
 		}
 
-		fmt.Printf("%c move %d,%d\n", markers[moveCounter%2], n, m)
-		board[n][m] = markers[moveCounter%2]
+		fmt.Printf("%c move %d,%d\n", markers[player+1], n, m)
+		board[n][m] = markers[player+1]
 
 		for i := 0; i < 5; i++ {
 			for _, marker := range board[i] {
