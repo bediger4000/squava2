@@ -188,11 +188,27 @@ func bestMove(board [25]int, iterations int, scoreFn func(*Node) float64, verbos
 
 		leafCount++
 
+		var increments [3]int
+
+		if winner == node.player {
+			switch node.player {
+			case MAXIMIZER:
+				increments[0], increments[2] = 0, 1
+			case MINIMIZER:
+				increments[0], increments[2] = 1, 0
+			}
+		} else {
+			switch node.player {
+			case MAXIMIZER:
+				increments[0], increments[2] = 1, 0
+			case MINIMIZER:
+				increments[0], increments[2] = 0, 1
+			}
+		}
+
 		for node != nil {
 			node.visits++
-			if winner == node.player {
-				node.wins++
-			}
+			node.wins += increments[node.player+1]
 			node = node.parent
 		}
 	}
