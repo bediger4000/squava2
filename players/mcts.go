@@ -7,6 +7,12 @@ import (
 	"strings"
 )
 
+/*
+ * Monte Carlo Tree Search,
+ * and MCTS with Upper Confidence Bound applied to trees
+ * from: https://en.wikipedia.org/wiki/Monte_Carlo_tree_search#cite_note-37
+ */
+
 type gameState struct {
 	player int
 	board  [25]int
@@ -35,6 +41,10 @@ func ratio(node *Node) float64 {
 
 func ucb1(node *Node) float64 {
 	v := float64(node.visits)
+	// Have to add 1 to node.parent.visits because back propagation
+	// doesn't happened until after the playout. The argument of math.Log()
+	// is supposed to be "the total number of simulations after the i-th move
+	// run by the parent node of the one considered"
 	return float64(node.wins)/v +
 		1.414*math.Sqrt(math.Log(float64(node.parent.visits+1))/v)
 }
@@ -99,6 +109,7 @@ func bestMove(board [25]int, iterations int, scoreFn func(*Node) float64, verbos
 
 	w, l, o := categorizeMoves(&board, root.untriedMoves, MAXIMIZER)
 
+	// If there are winning moves, pick one of them.
 	if len(w) == 1 {
 		return w[0], 10000, 1
 	}
@@ -109,6 +120,7 @@ func bestMove(board [25]int, iterations int, scoreFn func(*Node) float64, verbos
 	if len(o) > 0 {
 		root.untriedMoves = o
 	} else {
+		// If there are only losing moves, pick one of them
 		if len(l) == 1 {
 			return l[0], -10000, 1
 		}
@@ -159,6 +171,10 @@ func bestMove(board [25]int, iterations int, scoreFn func(*Node) float64, verbos
 		}
 
 		// Simulation
+		// Heavy playout, in that moves get categorized,
+		// winners, losers and others for the player making
+		// the move. Players make winning moves if they can and avoid
+		// losing moves if they can.
 		if winner == UNSET {
 			moves := state.remainingMoves()
 
@@ -207,6 +223,8 @@ func bestMove(board [25]int, iterations int, scoreFn func(*Node) float64, verbos
 		}
 	}
 
+	// subtle point in the Wikipedia article: select the move that
+	// had the most visits, not the best score.
 	moveNode := root.selectMostVisitedChild()
 
 	score = scoreFn(moveNode)
@@ -271,6 +289,9 @@ func (node *Node) selectBestChild(scoreFn func(*Node) float64) *Node {
 	best := node.childNodes[0]
 	bestScore := scoreFn(node.childNodes[0])
 
+	// Since there's a maximum of 25 child nodes, just loop
+	// through them, rather than pay the overhead of sorting
+	// a small number of children.
 	for _, c := range node.childNodes {
 		score := scoreFn(c)
 		if score > bestScore {
