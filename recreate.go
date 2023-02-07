@@ -1,23 +1,28 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"log"
-	"os"
 	"squava2/mover"
 )
 
 func main() {
+	computerFirstPtr := flag.Bool("C", false, "Computer takes first move (default false)")
+	flag.Parse()
 
-	markers := []rune{'X', '_', 'O'}
+	markers := []rune{'O', '_', 'X'}
 
 	board := make([][]rune, 5)
 	for i := 0; i < 5; i++ {
 		board[i] = []rune{'_', '_', '_', '_', '_'}
 	}
 
-	mvr := mover.NewFromFile(os.Args[1])
-	mvr.NextPlayer(1)
+	mvr := mover.NewFromFile(flag.Arg(0))
+	mvr.NextPlayer(-1)
+	if *computerFirstPtr {
+		mvr.NextPlayer(1)
+	}
 
 	for {
 
