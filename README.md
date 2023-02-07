@@ -15,12 +15,19 @@ I chose "win", mainly because it's computationally easier to check for 4-in-a-ro
 as a win separately from 3-in-a-row as a loss. After all, every 4-in-a-row has
 3-in-a-row inside it.
 
-Neither player can win until the 7th move (4 for starting play, 3 for the other).
+Neither player can win until the 7th move (4 for starting player, 3 for the other).
 The starting player can win on odd-numbered moves by winning with 4-in-a-row.
 The starting player can lose on even-numbered moves by losing with 3-in-a-row.
 
 Similarly, the second player wins on even-numbered moves by getting 4-in-a-row,
 or loses on odd-numbered moves with 3-in-a-row.
+
+A game has a maximum of 25 moves.
+I believe that the starting player always loses 25-move games, but I can't prove it.
+
+I've not see it written down anywhere, but "squava" is probably "square yavalath",
+[Yavalath](http://cambolbro.com/games/yavalath/)
+being the inspiration  for squava.
 
 ### Cat Games
 
