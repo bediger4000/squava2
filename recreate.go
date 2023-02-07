@@ -4,6 +4,7 @@ import (
 	"flag"
 	"fmt"
 	"log"
+	"os"
 	"squava2/mover"
 )
 
@@ -18,7 +19,16 @@ func main() {
 		board[i] = []rune{'_', '_', '_', '_', '_'}
 	}
 
-	mvr := mover.NewFromFile(flag.Arg(0))
+	// Guess if game representation is in a file,
+	// or in command line string.
+	var mvr *mover.Mvr
+	partial := flag.Arg(0)
+	if _, err := os.Stat(partial); err == nil {
+		mvr = mover.NewFromFile(partial)
+	} else {
+		mvr = mover.NewFromBuffer([]byte(partial))
+	}
+
 	mvr.NextPlayer(-1)
 	if *computerFirstPtr {
 		mvr.NextPlayer(1)
