@@ -9,6 +9,7 @@ import (
 	"strings"
 	"time"
 
+	"squava2/mover"
 	"squava2/players"
 )
 
@@ -22,8 +23,8 @@ func main() {
 	computerFirstPtr := flag.Bool("C", false, "Computer takes first move (default false)")
 	maxDepthPtr := flag.Int("d", 10, "maximum lookahead depth (alpha/beta)")
 	typ := flag.String("t", "A", "player type, A: alphabeta, G: A/B+avoid bad positions, M: MCTS/Plain, U: MCTS/UCB1")
-	u := flag.Float64("u", 0.50, "UCTK coefficient, player 1 (MCTS)")
-	i := flag.Int("i", 500000, "MCTS iterations, player 1")
+	i := flag.Int("i", 500000, "MCTS iterations")
+	partialGame := flag.String("p", "", "partial game, filename or comma-sep move string")
 	flag.Parse()
 
 	rand.Seed(time.Now().UTC().UnixNano())
@@ -32,7 +33,7 @@ func main() {
 
 	moveCounter := 0
 
-	computerPlayer := createPlayer(*typ, *maxDepthPtr, *u, *i)
+	computerPlayer := createPlayer(*typ, *maxDepthPtr, *i)
 
 	next := HUMAN
 	if *computerFirstPtr {
@@ -44,6 +45,16 @@ func main() {
 	// that an input move has already been taken.
 	bd := new(Board)
 
+	if *partialGame != "" {
+		next = gameSoFar(next, *partialGame, bd, computerPlayer)
+		playerPhrase := "human"
+		if next == 1 {
+			playerPhrase = "computer"
+		}
+		fmt.Printf("After reading in partial game, next player %s\n", playerPhrase)
+		fmt.Printf("%s\n", computerPlayer)
+	}
+
 	for moveCounter < 25 {
 
 		switch next {
@@ -54,7 +65,6 @@ func main() {
 			next = COMPUTER
 
 		case COMPUTER:
-
 			before := time.Now()
 			i, j, value, leafCount := computerPlayer.ChooseMove()
 			et := time.Since(before)
@@ -87,7 +97,7 @@ func main() {
 	fmt.Printf("%s\n", computerPlayer)
 }
 
-func createPlayer(typ string, maxDepth int, factor float64, iterations int) players.Player {
+func createPlayer(typ string, maxDepth int, iterations int) players.Player {
 
 	typ = strings.ToUpper(typ)
 
@@ -141,4 +151,32 @@ func (bd *Board) readMove() (x, y int) {
 	}
 	bd.makeMove(x, y, HUMAN)
 	return x, y
+}
+
+func gameSoFar(firstPlayer int, partial string, bd *Board, p players.Player) int {
+
+	var moves *mover.Mvr
+
+	// var partial could name a file, or be a string of x,y moves
+	if _, err := os.Stat(partial); err == nil {
+		moves = mover.NewFromFile(partial)
+	} else {
+		moves = mover.NewFromBuffer([]byte(partial))
+	}
+
+	moves.NextPlayer(firstPlayer)
+
+	next := firstPlayer
+
+	for {
+		player, n, m, counter, useIt := moves.Next()
+		if !useIt || counter > 24 {
+			break
+		}
+		(*bd)[n][m] = player
+		p.MakeMove(n, m, player)
+		next = player
+	}
+
+	return 0 - next
 }
