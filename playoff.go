@@ -40,11 +40,11 @@ func main() {
 	first, second := createPlayers(*firstType,
 		*secondType, *maxDepthPtr, *deterministic)
 
-	if *firstType == "M" {
+	if *firstType == "M" || *firstType == "U" {
 		first.(*players.MCTS).SetIterations(*i1)
 	}
 
-	if *secondType == "M" {
+	if *secondType == "M" || *secondType == "U" {
 		second.(*players.MCTS).SetIterations(*i2)
 	}
 
