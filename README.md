@@ -1,12 +1,21 @@
-# The Game of Squava
+# Algorithmic Players for the Game of Squava
+
+I wrote some algorithmic players for the game of [Squava]().
+I've written two variations on Alpha-beta minimaxing,
+and two variations on Monte Carlo Tree Search.
+
+This is my second attempt, my [first attempt](https://github.com/bediger4000/squava) is full of
+cruft and mistakes.
+I did not implement Monte Carlo Tree Search correctly, for example.
 
 ## Rules
 
 Squava is a tic-tac-toe variant. Moves are made like tic-tac-toe, except on a
-5x5 grid of cells. Players alternate marking cells, conventionally with `X` or
-`O`.  Four cells of the same mark in a row (verical, horizontal or diagonal)
+5x5 grid of cells.
+Players alternate marking cells, conventionally with `X` or `O`.
+Four cells of the same mark in a row (vertical, horizontal or diagonal)
 wins for the player with that mark. Three cells in a row loses. That is, a
-player can win outright, or lose.
+player can win outright, or lose outright.
 
 The rules have an ambiguity, in that it isn't clear what to do if a single marker
 fills in a row of 3, say, and a diagonal of 4. Does that player win or lose?
@@ -34,6 +43,20 @@ being the inspiration  for squava.
 Can "cat" get the game, as in ordinary tic-tac-toe?
 I don't know.
 I've got lots of 25-move example games, all of them lost by the first player.
+
+## Playing the game
+
+I wrote an interactive player,
+and a program that matches two algorithmic players against each other.
+
+### Software Engineering
+
+`Player` interface
+
+Code for all algorithmic players in same package,
+I originally had them in separate packages.
+
+Board representation.
 
 ## Other Investigations
 
