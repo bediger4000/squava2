@@ -53,6 +53,7 @@ func main() {
 		}
 		fmt.Printf("After reading in partial game, next player %s\n", playerPhrase)
 		fmt.Printf("%s\n", computerPlayer)
+		fmt.Printf("\nMy board:\n%s\n", bd)
 	}
 
 	for moveCounter < 25 {
@@ -122,6 +123,9 @@ func createPlayer(typ string, maxDepth int, iterations int) players.Player {
 	return nil
 }
 
+// This program's board representation.
+// Chosen for ease of human use rather than
+// speed or compactness.
 type Board [5][5]int
 
 func (bd *Board) makeMove(x, y, player int) {
@@ -138,7 +142,7 @@ func (bd *Board) readMove() (x, y int) {
 		}
 		if err != nil {
 			fmt.Printf("Failed to read: %v\n", err)
-			os.Exit(1)
+			continue
 		}
 		switch {
 		case x < 0 || x > 4 || y < 0 || y > 4:
@@ -151,6 +155,20 @@ func (bd *Board) readMove() (x, y int) {
 	}
 	bd.makeMove(x, y, HUMAN)
 	return x, y
+}
+
+func (bd *Board) String() string {
+	buf := &strings.Builder{}
+	buf.WriteString("   0 1 2 3 4")
+	markers := []rune{'O', '_', 'X'}
+	for n, row := range bd {
+		buf.WriteString("\n")
+		fmt.Fprintf(buf, "%d  ", n)
+		for _, player := range row {
+			fmt.Fprintf(buf, "%c ", markers[player+1])
+		}
+	}
+	return buf.String()
 }
 
 func gameSoFar(firstPlayer int, partial string, bd *Board, p players.Player) int {
