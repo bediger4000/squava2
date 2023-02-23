@@ -96,8 +96,9 @@ You can re-use the series of moves in two ways:
 1. The `recreate` program accepts either a file name with the string of
 moves as contents, or the string of moves on the command line:
    * `./recreate '1,1 2,2 4,1 0,4 1,4 4,3 3+,1 0,1 2+,1'`
+   * You hit return after `recreate` shows you the board so far.
 2. The  `sqv` program can accept a partial game on the command line,
-setting up the board for the algorithmic player:
+setting up the board for an algorithmic player:
    * `./sqv -t U -p '1,1 2,2 4,1 0,4 1,4'`
 
 You can investigate which move the algorithmic players make in a given
