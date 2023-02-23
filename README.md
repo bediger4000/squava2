@@ -127,6 +127,7 @@ type Player interface {
     ChooseMove() (int, int, int, int) // x,y coords of move, value, leaf node count
     FindWinner() int
     String() string // human readable formatted board
+}
 ```
 
 Code for each algorithmic player satisfies this Go interface.
