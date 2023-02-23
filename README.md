@@ -128,6 +128,11 @@ type Player interface {
     String() string // human readable formatted board
 ```
 
+Code for each algorithmic player satisfies this Go interface.
+Using a Go interface allows the two driver programs to work with
+a single type of "player".
+That was very convenient.
+
 Code for all algorithmic players lives in the same package.
 I had them in separate packages in my first attempt at algorithmic players.
 It seemed like that arrangement required lots of redundant code,
