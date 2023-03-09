@@ -1,7 +1,10 @@
 package main
 
 import (
+	"flag"
 	"fmt"
+	"io/fs"
+	"log"
 	"math/rand"
 	"os"
 	"strings"
@@ -14,28 +17,62 @@ const (
 	UNSET     = 0
 )
 
-func main() {
-	rand.Seed(time.Now().UnixNano() + int64(os.Getpid()))
+var marks = [2]int{-1, 1}
+var winnerStrings = [3]string{"O", "cat", "X"}
+var readMarks = "O_X"
 
-	marks := [2]int{-1, 1}
+func main() {
+	dirName := flag.String("d", "", "directory to write output boards. If not present, output to stdout")
+	flag.Parse()
+
+	if *dirName != "" {
+		if err := checkAndCreate(*dirName); err != nil {
+			log.Fatal(err)
+		}
+	}
+
+	rand.Seed(time.Now().UnixNano() + int64(os.Getpid()))
 
 	for i := 0; true; i++ {
 		var board [25]int
-		var winner, move int
-		bits := rand.Uint64()
-		for move = 0; move < 25; move++ {
-			x := ((bits & (1 << move)) >> move)
-			mark := marks[x]
+		var record [25]int
+		var winner, count int
+		for count = 0; count < 25; count++ {
+			mark := marks[count%2]
+			var move int
+			for move = rand.Intn(25); board[move] != UNSET; move = rand.Intn(25) {
+			}
 			board[move] = mark
+			record[count] = move
 			winner = findWinner(&board)
 			if winner != UNSET {
 				break
 			}
 		}
 
-		if move == 25 {
-			who := [3]string{"O", "cat", "X"}[board[winner]+1]
-			fmt.Printf("%s won:\n%s\n\n", who, boardString(board))
+		if count >= 24 {
+			if *dirName != "" {
+				fmt.Fprintf(os.Stderr, "%d won game %d\n", winner, i)
+				fileName := fmt.Sprintf("%s/b%d", *dirName, i)
+				fout, err := os.Create(fileName)
+				if err != nil {
+					log.Fatal("creating %q: %v\n", fileName, err)
+					continue
+				}
+				fmt.Fprintf(fout, "#%s won game %d\n", winnerStrings[winner+1], i)
+				fmt.Fprintf(fout, "%s", boardString(board, false))
+				fmt.Fprintf(fout, "# ")
+				for i := range record {
+					x := record[i] / 5
+					y := record[i] % 5
+					fmt.Fprintf(fout, "%d,%d ", x, y)
+				}
+				fmt.Fprintf(fout, "\n")
+				fout.Close()
+			} else {
+				fmt.Printf("%s won game %d\n", winnerStrings[winner+1], i)
+				fmt.Printf("%s", boardString(board, true))
+			}
 		}
 
 	}
@@ -75,17 +112,16 @@ func findWinner(board *[25]int) int {
 	return UNSET
 }
 
-// boardString exists as a separate function so that if
-// printf-style debugging is necessary, gameState.board
-// can also get printed.
-func boardString(board [25]int) string {
+func boardString(board [25]int, headers bool) string {
 	buf := &strings.Builder{}
-	buf.WriteString("   0 1 2 3 4\n")
+	if headers {
+		buf.WriteString("   0 1 2 3 4\n")
+	}
 	for i := 0; i < 25; i++ {
-		if (i % 5) == 0 {
+		if headers && (i%5) == 0 {
 			fmt.Fprintf(buf, "%c  ", rune(i/5)+'0')
 		}
-		fmt.Fprintf(buf, "%c ", "O_X"[board[i]+1])
+		fmt.Fprintf(buf, "%c ", readMarks[board[i]+1])
 		if (i % 5) == 4 {
 			buf.WriteString("\n")
 		}
@@ -135,4 +171,24 @@ var mctsLosingTriplets = [][][]int{
 	{}, {}, {}, {},
 	{{20, 21, 22}, {21, 22, 23}, {22, 23, 24}, {12, 17, 22}, {10, 16, 22}, {22, 18, 14}},
 	{}, {},
+}
+
+func checkAndCreate(dirName string) error {
+	info, err := os.Stat(dirName)
+	if err != nil {
+		err = os.MkdirAll(dirName, fs.FileMode(0o777))
+		if err != nil {
+			return err
+		}
+		info, err = os.Stat(dirName)
+		if err != nil {
+			return err
+		}
+	}
+
+	if info.IsDir() {
+		return nil
+	}
+
+	return fmt.Errorf("%q exists and it's not a directory", dirName)
 }
