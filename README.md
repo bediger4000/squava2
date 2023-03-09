@@ -40,9 +40,48 @@ being the inspiration  for squava.
 
 ### Cat Games
 
-Can "cat" get the game, as in ordinary tic-tac-toe?
-I don't know.
-I've got lots of 25-move example games, all of them lost by the first player.
+"Cat" can get the game, as in ordinary tic-tac-toe.
+Generating boards randomly does show that cat games,
+and games won by both first and second players are possible.
+
+Cat got this game:
+```
+O O X X O
+X X O O X
+O O X X O
+X X O O X
+O O X X O
+```
+The sequence of moves (`O` moved first):
+```
+2,4 1,0 2,1 2,3 1,3 2,2 0,1 0,2 3,3 3,1 1,2 3,4 4,4 1,1 2,0 4,2 4,1 0,3 3,2 1,4 0,0 3,0 4,0 4,3 0,4 
+```
+
+
+Algorithmic players can produce 25-move games.
+In my experimentation, all 25-move games are lost by the first player,
+The first move player has to be an Alpha-beta minimaxing player,
+and the second player a Monte Carlo Tree Search player.
+
+The first player (`O`) won this randomly-generated game:
+
+```
+   0 1 2 3 4
+0  X X O O X
+1  O X X O O
+2  X O O O X
+3  O X X O O
+4  X X O O X
+```
+Here's the series of moves. `O` moves first, `X` second:
+
+```
+2,2 4,4 4,2 0,4 1,4 4,0 2,1 2,4 3,0 3,1 1,3 0,0 3,4 3,2 4,3 1,1 1,0 1,2 0,2 2,0 0,3 0,1 3,3 4,1 2,3 
+```
+
+The final move at 2,3 completes a 5-in-a-row, and a 3-in-a-row.
+That's an  extremely unlikely outcome for a real game,
+where at least one of the players has the goal of winning.
 
 ## Playing the game
 
