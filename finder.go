@@ -1,5 +1,16 @@
 package main
 
+/*
+ * Create randomly-filled in 5x5 squava game boards.
+ * Only output the boards that are completely filled in,
+ * that is, the 25th move is the last move, win, lose
+ * or draw.
+ *
+ * The point is to find examples of 25-move games to see
+ * if it's possible for 1st or 2nd mover to win (both can)
+ * or if cat can get the game (it can).
+ */
+
 import (
 	"flag"
 	"fmt"
