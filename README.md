@@ -1,6 +1,6 @@
 # Algorithmic Players for the Game of Squava
 
-I wrote some algorithmic players for the game of [Squava]((https://nestorgames.com/rulebooks/SQUAVA_EN.pdf).
+I wrote some algorithmic players for the game of [Squava](https://nestorgames.com/rulebooks/SQUAVA_EN.pdf).
 I've written two variations on Alpha-beta minimaxing,
 and two variations on Monte Carlo Tree Search.
 
