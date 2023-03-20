@@ -55,7 +55,8 @@ at the 5th move.
 
 ### More nuanced view
 
-|First|Second|First wins|Second wins|Mean moves|Median moves|Min|Max|
+
+|Moves First|Moves Second|First wins|Second wins|Mean moves|Median moves|Min moves|Max moves|
 |:----:|:----:|----:|----:|----:|----:|----:|----:|----:|
 |A|A|189|211|19.52|21|13|24|
 |A|G|146|254|19.48|20|13|24|
