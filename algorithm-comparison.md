@@ -153,7 +153,7 @@ Here's a histogram of the length of games in my tournament.
 13- and 21-move games predominate.
 
 The first player won outright all of the 13-move games,
-but all 4 players won some 13-move games.
+but all 4 players won some 21-move games.
 
 Of the 785 21-move games, the first player lost outright 705 games,
 while the first player won outright 80 games.
