@@ -1,12 +1,14 @@
 # Algorithmic Players for the Game of Squava
 
-I wrote some algorithmic players for the game of [Squava]().
+I wrote some algorithmic players for the game of [Squava]((https://nestorgames.com/rulebooks/SQUAVA_EN.pdf).
 I've written two variations on Alpha-beta minimaxing,
 and two variations on Monte Carlo Tree Search.
 
 This is my second attempt, my [first attempt](https://github.com/bediger4000/squava) is full of
 cruft and mistakes.
 I did not implement Monte Carlo Tree Search correctly, for example.
+
+[Comparison of algorithmic players](algorithm-comparison.md).
 
 ## Rules of the game
 
@@ -42,7 +44,7 @@ being the inspiration  for squava.
 
 "Cat" can get the game, as in ordinary tic-tac-toe.
 Generating boards randomly does show that cat games,
-and games won by both first and second players are possible.
+and 25-moves games won by both first and second players are possible.
 
 Cat got this game:
 ```
