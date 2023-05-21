@@ -34,7 +34,6 @@ Similarly, the second player wins on even-numbered moves by getting 4-in-a-row,
 or loses on odd-numbered moves with 3-in-a-row.
 
 A game has a maximum of 25 moves.
-I believe that the starting player always loses 25-move games, but I can't prove it.
 
 I've not see it written down anywhere, but "squava" is probably "square yavalath",
 [Yavalath](http://cambolbro.com/games/yavalath/)
@@ -83,7 +82,7 @@ Here's the series of moves. `O` moves first, `X` second:
 
 The final move at 2,3 completes a 5-in-a-row, and a 3-in-a-row.
 That's an  extremely unlikely outcome for a real game,
-where at least one of the players has the goal of winning.
+where at least one of the players tries to win.
 
 ## Playing the game
 
