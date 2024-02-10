@@ -19,8 +19,8 @@ func main() {
 
 	maxDepthPtr := flag.Int("d", 10, "maximum lookahead depth (alpha/beta)")
 	deterministic := flag.Bool("D", false, "Play deterministically")
-	firstType := flag.String("1", "A", "first player type, A: alphabeta, G: A/B+avoid bad positions, M: MCTS")
-	secondType := flag.String("2", "M", "second player type, A: alphabeta, G: A/B+avoid bad positions, M: MCTS")
+	firstType := flag.String("1", "A", "first player type, A: alphabeta, G: A/B+avoid bad positions, M: MCTS, U: MCTS+UCT")
+	secondType := flag.String("2", "M", "second player type, A: alphabeta, G: A/B+avoid bad positions, M: MCTS, U: MCTS+UCT")
 	nonInteractive := flag.Int("n", 1, "play <number> games non-interactively")
 	i1 := flag.Int("i1", 500000, "MCTS iterations, player 1")
 	i2 := flag.Int("i2", 500000, "MCTS iterations, player 2")
