@@ -35,7 +35,7 @@ or loses on odd-numbered moves with 3-in-a-row.
 
 A game has a maximum of 25 moves.
 
-I've not see it written down anywhere, but "squava" is probably "square yavalath",
+I've not seen it written down anywhere, but "squava" is probably "square yavalath",
 [Yavalath](http://cambolbro.com/games/yavalath/)
 being the inspiration  for squava.
 
@@ -143,6 +143,40 @@ setting up the board for an algorithmic player:
 
 You can investigate which move the algorithmic players make in a given
 situation with the `-p 'x,y x,y...'` partial game.
+
+### Elo ratings of algorithms
+
+I wrote another program that calculates Elo ratings of the algorithms.
+It starts every algorithm at a rating of 1300, with 14 effective games played.
+The program picks a pair of algorithms, and has them play a game.
+At the end of the game, the program calculates K, E and S for the pair
+of algorithms.
+
+* K = 800/N, N is the number of games the algorithm has played,
+including this game.
+* E = 1/(1 + 10<sup>(R<sub>1</sub> - R<sub>0</sub>)/400</sup>)
+Where R<sub>1</sub> is the other algorithm's rating before the game,
+and R<sub>0</sub> is this algorithm's rating before the game.
+* S = 1, if the algorithm wins, 0.5 if it draws, or 0 if it loses.
+
+Change in rating of the algorithm is K(S - E)
+
+I had to let the program play 400 games before the Elo ratings stabilized.
+
+```
+$ go build elo.go
+$ ./elo -n 400
+0       70.96   A       M       A       1300    1327    15      1300    1273    15
+1       77.77   A       U       U       1327    1300    16      1300    1329    15
+2       11.14   M       A       A       1273    1250    16      1300    1321    17
+3       200.22  G       M       G       1300    1323    15      1250    1230    17
+...
+```
+Each output line is game number, elapsed time in seconds,
+first player, second player, winner, first player's rating before game,
+first player's rating after game, first player's effective games,
+second player's rating before game,
+second player's rating after game, second player's effective games.
 
 ## Software Engineering
 
