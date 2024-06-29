@@ -178,6 +178,12 @@ first player's rating after game, first player's effective games,
 second player's rating before game,
 second player's rating after game, second player's effective games.
 
+After several 400-game runs, I conclude that
+Alpha-beta minimaxing (abbreviated 'A' above) rates about 1320,
+Alpha-beta minimaxing with a better static valuation (abbreviated 'G' above) rates around 1340,
+MCTS with UCB1 (abbreviated 'U' above) rates around 1400,
+while plain MCTS ('M' above) is no more than 1110.
+
 ## Software Engineering
 
 #### `Player` interface
